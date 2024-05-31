@@ -1,0 +1,60 @@
+package com.monetamedia.Service;
+
+import com.monetamedia.Models.Post;
+import com.monetamedia.Repositories.PostRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class PostService {
+    private final PostRepository postRepository;
+
+    @Autowired
+    public PostService(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
+
+    public Post createPost(Post post) {
+        postRepository.save(post);
+        return post;
+    }
+
+    public Post getPostById(Long id) {
+        return postRepository.findById(id);
+    }
+
+    public List<Post> getAllPosts() {
+        return postRepository.findAll();
+    }
+
+    public List<Post> getPosts(int page, int size, String sortBy, String sortDir) {
+        return postRepository.findAll(page, size, sortBy, sortDir);
+    }
+
+    public List<Post> getPostsByUserId(Long userId) {
+        return postRepository.findByUserId(userId);
+    }
+
+    public List<Post> searchPosts(String query, int page, int size, String sortBy, String sortDir) {
+        return postRepository.searchPosts(query, page, size, sortBy, sortDir);
+    }
+
+    public Post updatePost(Post post) {
+        postRepository.update(post);
+        return post;
+    }
+
+    public void deletePost(Long id) {
+        postRepository.delete(id);
+    }
+
+    public void likePost(Long postId, Long userId) {
+        // Implement like logic
+    }
+
+    public void unlikePost(Long postId, Long userId) {
+        // Implement unlike logic
+    }
+}
