@@ -23,6 +23,9 @@ public class UserController {
 
     @PostMapping("/create")
     public ResponseEntity<User> createUser(@RequestBody User user) {
+        if (user.isPresent()){
+            System.out.println("username with :" + user.getUserName() + " already exists");
+        }
         User createdUser = userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }

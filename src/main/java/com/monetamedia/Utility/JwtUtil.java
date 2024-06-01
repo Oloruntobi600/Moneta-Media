@@ -102,16 +102,16 @@ public String generateToken(UserDetails userDetails) {
             throw new RuntimeException("Error while extracting expiration from token", exception);
         }
     }
-//    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-//        final Claims claims = extractAllClaims(token);
-//        return claimsResolver.apply(claims);
-//    }
-//
-//    private Claims extractAllClaims(String token) {
-//        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
-//    }
-//
-//    private Date genAccessExpirationDate() {
-//        return new Date(System.currentTimeMillis() + jwtExpirationMs);
-//    }
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+    }
+
+    private Date genAccessExpirationDate() {
+        return new Date(System.currentTimeMillis() + jwtExpirationMs);
+    }
 }

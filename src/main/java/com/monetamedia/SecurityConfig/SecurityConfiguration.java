@@ -24,6 +24,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
@@ -41,9 +42,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable() // Disable CSRF protection
                 .authorizeRequests()
-                .antMatchers("/authenticate/**", "/register","/users/create","/users/login").permitAll()
+                .antMatchers("/authenticate/**","/register","/logins/login").permitAll()
+                .antMatchers("/users/create").permitAll()
                 .anyRequest().authenticated()
-                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
     @Override
@@ -53,8 +57,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 
     @Bean
-    public AuthenticationManager authenticationManager() throws Exception {
-        return super.authenticationManager();
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 
 

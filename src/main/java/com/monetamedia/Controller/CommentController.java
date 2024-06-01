@@ -21,29 +21,30 @@ public class CommentController {
     }
 
     @PostMapping
-    public Comment createComment(@RequestBody Comment comment) {
-        return commentService.createComment(comment);
+    public ResponseEntity<Comment> createComment(@RequestBody Comment comment) {
+        return new ResponseEntity<>(commentService.createComment(comment), HttpStatus.OK);
     }
-
     @GetMapping("/{id}")
-    public Comment getCommentById(@PathVariable Long id) {
-        return commentService.getCommentById(id);
+    public ResponseEntity<Comment> getCommentById(@PathVariable Long id) {
+        return new ResponseEntity<>(commentService.getCommentById(id), HttpStatus.OK);
     }
-
     @GetMapping
-    public List<Comment> getAllComments() {
-        return commentService.getAllComments();
+    public ResponseEntity<List<Comment>> getAllComments() {
+        return new ResponseEntity<>(commentService.getAllComments(), HttpStatus.OK);
     }
-
     @GetMapping("/post/{postId}")
-    public List<Comment> getCommentsByPostId(@PathVariable Long postId,int page, int size, String sortBy, String sortDir) {
-        return commentService.getCommentsByPostId(postId,page,size,sortBy,sortDir);
+    public ResponseEntity<List<Comment>> getCommentsByPostId(@PathVariable Long postId,
+                                                             @RequestParam int page,
+                                                             @RequestParam int size,
+                                                             @RequestParam String sortBy,
+                                                             @RequestParam String sortDir) {
+        return new ResponseEntity<>(commentService.getCommentsByPostId(postId, page, size, sortBy, sortDir), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public Comment updateComment(@PathVariable Long id, @RequestBody Comment comment) {
+    public ResponseEntity<Comment> updateComment(@PathVariable Long id, @RequestBody Comment comment) {
         comment.setId(id);
-        return commentService.updateComment(comment);
+        return new ResponseEntity<>(commentService.updateComment(comment), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

@@ -7,6 +7,7 @@ import com.monetamedia.Utility.AuthenticationRequest;
 import com.monetamedia.Utility.AuthenticationResponse;
 import com.monetamedia.Utility.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -36,19 +37,22 @@ public class AuthenticationController {
     @Autowired
     private UserRepository userRepository;
 
-//    @PostMapping("/authentication")
-//    public ResponseEntity<?> authenticateUser(@RequestBody User loginRequest) {
-//        Authentication authentication = authenticationManager.authenticate(
-//                new UsernamePasswordAuthenticationToken(
-//                        loginRequest.getUserName(),
-//                        loginRequest.getPassword()
-//                )
-//        );
-//
-//        SecurityContextHolder.getContext().setAuthentication(authentication);
-//        String jwt = jwtUtil.generateToken((UserDetails) loginRequest);
-//        return ResponseEntity.ok(new JwtResponse(jwt));
-//    }
+    @PostMapping("/authentication")
+    public ResponseEntity<?> authenticateUser(@RequestBody AuthenticationRequest authenticationRequest) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authenticationRequest.getUsername(),
+                            authenticationRequest.getPassword()
+                    )
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtil.generateToken((UserDetails) authentication.getPrincipal());
+            return ResponseEntity.ok(new AuthenticationResponse(jwt));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+    }
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
@@ -57,40 +61,4 @@ public class AuthenticationController {
     }
 
 
-    class JwtResponse {
-        private String token;
-
-        public JwtResponse(String token) {
-            this.token = token;
-        }
-
-        public String getToken() {
-            return token;
-        }
-
-        public void setToken(String token) {
-            this.token = token;
-        }
-
-
-//    @PostMapping("/authenticate")
-//    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
-//        try {
-//            authenticationManager.authenticate(
-//                    new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword())
-//            );
-//        } catch (BadCredentialsException e) {
-//            throw new Exception("Incorrect username or password", e);
-//        }
-//
-//        final UserDetails userDetails = userDetailsService
-//                .loadUserByUsername(authenticationRequest.getUsername());
-//
-//        final String jwt = jwtUtil.generateToken(valueOf(userDetails));
-//
-//        return ResponseEntity.ok(new AuthenticationResponse(jwt));
-//    }
-//
-
-    }
 }

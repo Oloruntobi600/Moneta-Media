@@ -54,9 +54,9 @@ public class CommentService {
     public ApiResponse deleteComment(Long id) {
         int rowsAffected = commentRepository.delete(id);
         if (rowsAffected > 0) {
-            return new ApiResponse("Post with ID " + id + " deleted successfully");
+            return new ApiResponse("Post with ID " + id + " deleted successfully",true);
         } else {
-            return new ApiResponse("Post with ID " + id + " not found");
+            return new ApiResponse("Post with ID " + id + " not found",true);
         }
     }
 }

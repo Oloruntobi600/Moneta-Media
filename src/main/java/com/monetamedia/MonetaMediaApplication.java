@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableTransactionManagement
-//@PropertySource("file:${user.dir}/.env")
 public class MonetaMediaApplication {
 
     public static void main(String[] args) {
