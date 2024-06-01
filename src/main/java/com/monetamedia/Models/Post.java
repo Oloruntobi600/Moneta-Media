@@ -5,12 +5,16 @@ import java.time.LocalDateTime;
 
 @Data
 public class Post {
+
     private Long id;
     private String content;
-    private LocalDateTime creationDate;
+    private LocalDateTime creationdate;
     private int likesCount;
     private Long userId;
 
+    public Post() {
+        this.creationdate = LocalDateTime.now();
+    }
     public Long getId() {
         return id;
     }
@@ -27,12 +31,11 @@ public class Post {
         this.content = content;
     }
 
-    public LocalDateTime getCreationDate() {
-        return creationDate;
-    }
-
     public void setCreationDate(LocalDateTime creationDate) {
-        this.creationDate = creationDate;
+        this.creationdate = creationDate;
+    }
+    public LocalDateTime getCreationdate() {
+        return creationdate;
     }
 
     public int getLikesCount() {

@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class PostRepository {
@@ -16,13 +17,17 @@ public class PostRepository {
     }
 
     public int save(Post post) {
-        String sql = "INSERT INTO posts (content, creation_date, likes_count, user_id) VALUES (?, ?, ?, ?)";
-        return jdbcTemplate.update(sql, post.getContent(), post.getCreationDate(), post.getLikesCount(), post.getUserId());
+        String sql = "INSERT INTO posts (content, creationdate, likescount, userid) VALUES (?, ?, ?, ?)";
+        return jdbcTemplate.update(sql, post.getContent(), post.getCreationdate(), post.getLikesCount(), post.getUserId());
     }
 
-    public Post findById(Long id) {
-        String sql = "SELECT * FROM posts WHERE id = ?";
-        return jdbcTemplate.queryForObject(sql, new Object[]{id}, postRowMapper);
+    public Optional<Post> findById(Long userid) {
+        String sql = "SELECT * FROM posts WHERE userid = ?";
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, new Object[]{userid}, postRowMapper));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     public List<Post> findAll() {
@@ -31,13 +36,13 @@ public class PostRepository {
     }
 
     public List<Post> findByUserId(Long userId) {
-        String sql = "SELECT * FROM posts WHERE user_id = ?";
+        String sql = "SELECT * FROM posts WHERE userid = ?";
         return jdbcTemplate.query(sql, new Object[]{userId}, postRowMapper);
     }
 
     public int update(Post post) {
-        String sql = "UPDATE posts SET content = ?, creation_date = ?, likes_count = ?, user_id = ? WHERE id = ?";
-        return jdbcTemplate.update(sql, post.getContent(), post.getCreationDate(), post.getLikesCount(), post.getUserId(), post.getId());
+        String sql = "UPDATE posts SET content = ?, creationdate = ?, likescount = ?, userid = ? WHERE id = ?";
+        return jdbcTemplate.update(sql, post.getContent(), post.getCreationdate(), post.getLikesCount(), post.getUserId(), post.getId());
     }
 
     public int delete(Long id) {
@@ -66,11 +71,25 @@ public class PostRepository {
         Post post = new Post();
         post.setId(rs.getLong("id"));
         post.setContent(rs.getString("content"));
-        post.setCreationDate(rs.getTimestamp("creation_date").toLocalDateTime());
-        post.setLikesCount(rs.getInt("likes_count"));
-        post.setUserId(rs.getLong("user_id"));
+        post.setCreationDate(rs.getTimestamp("creationdate").toLocalDateTime());
+        post.setLikesCount(rs.getInt("likescount"));
+        post.setUserId(rs.getLong("userid"));
         return post;
     };
+    public void addLike(Long postId, Long userId) {
+        String sql = "INSERT INTO likes (post_id, userid) VALUES (?, ?)";
+        jdbcTemplate.update(sql, postId, userId);
+    }
+
+    public void removeLike(Long postId, Long userId) {
+        String sql = "DELETE FROM likes WHERE postid = ? AND userid = ?";
+        jdbcTemplate.update(sql, postId, userId);
+    }
+
+    public int countLikes(Long postId) {
+        String sql = "SELECT COUNT(*) FROM likes WHERE postid = ?";
+        return jdbcTemplate.queryForObject(sql, new Object[]{postId}, Integer.class);
+    }
 }
 
 

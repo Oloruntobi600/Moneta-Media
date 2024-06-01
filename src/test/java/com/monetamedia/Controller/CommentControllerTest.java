@@ -1,135 +1,144 @@
 package com.monetamedia.Controller;
 
+import com.monetamedia.Models.ApiResponse;
 import com.monetamedia.Models.Comment;
 import com.monetamedia.Service.CommentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
+@WebMvcTest(CommentController.class)
+@ExtendWith(MockitoExtension.class)
 public class CommentControllerTest {
 
+    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockBean
     private CommentService commentService;
 
-    @InjectMocks
-    private CommentController commentController;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private Comment comment;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(commentController).build();
+    public void setup() {
+        comment = new Comment();
+        comment.setId(1L);
+        comment.setContent("Test comment");
     }
 
     @Test
-    void createComment() throws Exception {
-        Comment comment = new Comment();
-        comment.setId(1L);
-        comment.setContent("Test content");
-        comment.setCreationDate(LocalDateTime.now());
-        comment.setPostId(1L);
-        comment.setUserId(1L);
-
+    public void testCreateComment() throws Exception {
         when(commentService.createComment(any(Comment.class))).thenReturn(comment);
 
-        mockMvc.perform(post("/comments")
+        mockMvc.perform(MockMvcRequestBuilders.post("/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"content\":\"Test content\",\"creationDate\":\"2024-05-28T12:00:00\",\"postId\":1,\"userId\":1}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.content").value("Test content"));
+                        .content(objectMapper.writeValueAsString(comment)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(comment.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content").value(comment.getContent()))
+                .andDo(print());
     }
 
     @Test
-    void getCommentById() throws Exception {
-        Comment comment = new Comment();
-        comment.setId(1L);
-        comment.setContent("Test content");
-        comment.setCreationDate(LocalDateTime.now());
-        comment.setPostId(1L);
-        comment.setUserId(1L);
+    public void testGetCommentById() throws Exception {
+        when(commentService.getCommentById(anyLong())).thenReturn(comment);
 
-        when(commentService.getCommentById(1L)).thenReturn(comment);
-
-        mockMvc.perform(get("/comments/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.content").value("Test content"));
+        mockMvc.perform(MockMvcRequestBuilders.get("/comments/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(comment.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content").value(comment.getContent()))
+                .andDo(print());
     }
 
     @Test
-    void getAllComments() throws Exception {
-        Comment comment = new Comment();
-        comment.setId(1L);
-        comment.setContent("Test content");
-        comment.setCreationDate(LocalDateTime.now());
-        comment.setPostId(1L);
-        comment.setUserId(1L);
-
-        List<Comment> comments = Collections.singletonList(comment);
+    public void testGetAllComments() throws Exception {
+        List<Comment> comments = Arrays.asList(comment);
         when(commentService.getAllComments()).thenReturn(comments);
 
-        mockMvc.perform(get("/comments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].content").value("Test content"));
+        mockMvc.perform(MockMvcRequestBuilders.get("/comments")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(comment.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].content").value(comment.getContent()))
+                .andDo(print());
     }
 
     @Test
-    void getCommentsByPostId() throws Exception {
-        Comment comment = new Comment();
-        comment.setId(1L);
-        comment.setContent("Test content");
-        comment.setCreationDate(LocalDateTime.now());
-        comment.setPostId(1L);
-        comment.setUserId(1L);
+    public void testGetCommentsByPostId() throws Exception {
+        List<Comment> comments = Arrays.asList(comment);
+        when(commentService.getCommentsByPostId(anyLong(), any(Integer.class), any(Integer.class), any(String.class), any(String.class))).thenReturn(comments);
 
-        List<Comment> comments = Collections.singletonList(comment);
-        when(commentService.getCommentsByPostId(1L)).thenReturn(comments);
-
-        mockMvc.perform(get("/comments/post/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].content").value("Test content"));
+        mockMvc.perform(MockMvcRequestBuilders.get("/comments/post/{postId}", 1L)
+                        .param("page", "0")
+                        .param("size", "10")
+                        .param("sortBy", "id")
+                        .param("sortDir", "asc")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(comment.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].content").value(comment.getContent()))
+                .andDo(print());
     }
 
     @Test
-    void updateComment() throws Exception {
-        Comment comment = new Comment();
-        comment.setId(1L);
-        comment.setContent("Updated content");
-        comment.setCreationDate(LocalDateTime.now());
-        comment.setPostId(1L);
-        comment.setUserId(1L);
-
+    public void testUpdateComment() throws Exception {
         when(commentService.updateComment(any(Comment.class))).thenReturn(comment);
 
-        mockMvc.perform(put("/comments/1")
+        mockMvc.perform(MockMvcRequestBuilders.put("/comments/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"content\":\"Updated content\",\"creationDate\":\"2024-05-28T12:00:00\",\"postId\":1,\"userId\":1}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.content").value("Updated content"));
+                        .content(objectMapper.writeValueAsString(comment)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(comment.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content").value(comment.getContent()))
+                .andDo(print());
     }
 
     @Test
-    void deleteComment() throws Exception {
-        mockMvc.perform(delete("/comments/1"))
-                .andExpect(status().isOk());
+    public void testDeleteComment() throws Exception {
+        ApiResponse response = new ApiResponse("Comment deleted successfully", true);
+        when(commentService.deleteComment(anyLong())).thenReturn(response);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/comments/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(response.getMessage()))
+                .andDo(print());
+    }
+
+    @Test
+    public void testDeleteCommentNotFound() throws Exception {
+        ApiResponse response = new ApiResponse("Comment not found", false);
+        when(commentService.deleteComment(anyLong())).thenReturn(response);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/comments/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(response.getMessage()))
+                .andDo(print());
     }
 }

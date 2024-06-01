@@ -1,10 +1,13 @@
 package com.monetamedia.Service;
 
+import com.monetamedia.Exception.ResourceNotFoundException;
+import com.monetamedia.Models.ApiResponse;
 import com.monetamedia.Models.Post;
 import com.monetamedia.Repositories.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -17,14 +20,18 @@ public class PostService {
     }
 
     public Post createPost(Post post) {
+        if (post.getCreationdate() == null) {
+            post.setCreationDate(LocalDateTime.now());
+        }
         postRepository.save(post);
         return post;
     }
 
-    public Post getPostById(Long id) {
-        return postRepository.findById(id);
-    }
 
+    public Post getPostById(Long id) {
+        return postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id " + id));
+    }
     public List<Post> getAllPosts() {
         return postRepository.findAll();
     }
@@ -45,16 +52,28 @@ public class PostService {
         postRepository.update(post);
         return post;
     }
-
-    public void deletePost(Long id) {
-        postRepository.delete(id);
-    }
-
     public void likePost(Long postId, Long userId) {
-        // Implement like logic
+        postRepository.addLike(postId, userId);
+        updateLikesCount(postId);
     }
 
     public void unlikePost(Long postId, Long userId) {
-        // Implement unlike logic
+        postRepository.removeLike(postId, userId);
+        updateLikesCount(postId);
+    }
+
+    private void updateLikesCount(Long postId) {
+        int likesCount = postRepository.countLikes(postId);
+        Post post = getPostById(postId);
+        post.setLikesCount(likesCount);
+        postRepository.update(post);
+    }
+    public ApiResponse deletePost(Long id) {
+        int rowsAffected = postRepository.delete(id);
+        if (rowsAffected > 0) {
+            return new ApiResponse("Post with ID " + id + " deleted successfully");
+        } else {
+            return new ApiResponse("Post with ID " + id + " not found");
+        }
     }
 }

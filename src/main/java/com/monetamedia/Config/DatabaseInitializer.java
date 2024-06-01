@@ -52,10 +52,18 @@ public class DatabaseInitializer {
                     "FOREIGN KEY (user_id) REFERENCES users(userId), " +
                     "FOREIGN KEY (follower_id) REFERENCES users(userId))";
 
+            String createUserUnFollowersTable = "CREATE TABLE IF NOT EXISTS user_unfollowers (" +
+                    "user_id INT NOT NULL, " +
+                    "unfollower_id INT NOT NULL, " +
+                    "PRIMARY KEY (user_id, unfollower_id), " +
+                    "FOREIGN KEY (user_id) REFERENCES users(userId), " +
+                    "FOREIGN KEY (unfollower_id) REFERENCES users(userId))";
+
             jdbcTemplate.execute(createUsersTable);
             jdbcTemplate.execute(createPostsTable);
             jdbcTemplate.execute(createCommentsTable);
             jdbcTemplate.execute(createUserFollowersTable);
+            jdbcTemplate.execute(createUserUnFollowersTable);
         } catch (Exception e) {
             e.printStackTrace();
         }

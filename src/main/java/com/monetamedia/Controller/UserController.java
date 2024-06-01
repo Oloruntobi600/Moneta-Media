@@ -70,13 +70,19 @@ public class UserController {
         return userService.markAttendance(request);
     }
 
-    @PostMapping("/{id}/follow/{followId}")
-    public void followUser(@PathVariable Long id, @PathVariable Long followId) {
-        userService.followUser(id, followId);
-    }
 
+    @PostMapping("/{id}/follow/{followId}")
+    public ResponseEntity<String> followUser(@PathVariable Long id, @PathVariable Long followId) {
+        userService.followUser(id, followId);
+        String username = userService.getUserById(id).getUserName();
+        String followUsername = userService.getUserById(followId).getUserName();
+        return ResponseEntity.ok(username + " has followed " + followUsername + " successfully");
+    }
     @PostMapping("/{id}/unfollow/{unfollowId}")
-    public void unfollowUser(@PathVariable Long id, @PathVariable Long unfollowId) {
+    public ResponseEntity<String> unfollowUser(@PathVariable Long id, @PathVariable Long unfollowId) {
         userService.unfollowUser(id, unfollowId);
+        String username = userService.getUserById(id).getUserName();
+        String followUsername = userService.getUserById(unfollowId).getUserName();
+        return ResponseEntity.ok(username + " has unfollowed " + followUsername + " successfully");
     }
 }

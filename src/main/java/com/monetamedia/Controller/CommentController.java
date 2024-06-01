@@ -1,8 +1,11 @@
 package com.monetamedia.Controller;
 
+import com.monetamedia.Models.ApiResponse;
 import com.monetamedia.Models.Comment;
 import com.monetamedia.Service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,8 +36,8 @@ public class CommentController {
     }
 
     @GetMapping("/post/{postId}")
-    public List<Comment> getCommentsByPostId(@PathVariable Long postId) {
-        return commentService.getCommentsByPostId(postId);
+    public List<Comment> getCommentsByPostId(@PathVariable Long postId,int page, int size, String sortBy, String sortDir) {
+        return commentService.getCommentsByPostId(postId,page,size,sortBy,sortDir);
     }
 
     @PutMapping("/{id}")
@@ -44,7 +47,12 @@ public class CommentController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteComment(@PathVariable Long id) {
-        commentService.deleteComment(id);
+    public ResponseEntity<ApiResponse> deleteComment(@PathVariable Long id) {
+        ApiResponse response = commentService.deleteComment(id);
+        if (response.getMessage().contains("deleted successfully")) {
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
     }
 }

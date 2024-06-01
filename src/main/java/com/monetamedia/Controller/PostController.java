@@ -1,8 +1,11 @@
 package com.monetamedia.Controller;
 
+import com.monetamedia.Models.ApiResponse;
 import com.monetamedia.Models.Post;
 import com.monetamedia.Service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,7 +34,7 @@ public class PostController {
     public List<Post> searchPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "creation_date") String sortBy,
+            @RequestParam(defaultValue = "creationdate") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDir,
             @RequestParam(defaultValue = "") String search) {
         return postService.searchPosts(search, page, size, sortBy, sortDir);
@@ -54,8 +57,13 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public void deletePost(@PathVariable Long id) {
-        postService.deletePost(id);
+    public ResponseEntity<ApiResponse> deletePost(@PathVariable Long id) {
+        ApiResponse response = postService.deletePost(id);
+        if (response.getMessage().contains("deleted successfully")) {
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
     }
 
     @PostMapping("/{id}/like")

@@ -2,7 +2,6 @@ package com.monetamedia.Controller;
 
 
 import com.monetamedia.Models.User;
-import com.monetamedia.Service.MyUserDetailService;
 import com.monetamedia.Service.UserService;
 import com.monetamedia.Utility.JwtUtil;
 import org.slf4j.Logger;
@@ -17,28 +16,26 @@ import org.springframework.web.bind.annotation.*;
 public class LoginController {
 
     private final UserService userService;
-    private final MyUserDetailService myUserDetailService;
     private final JwtUtil jwtUtil;
-    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
-    public LoginController(UserService userService, MyUserDetailService myUserDetailService, JwtUtil jwtUtil) {
+
+    public LoginController(UserService userService, JwtUtil jwtUtil) {
         this.userService = userService;
-        this.myUserDetailService = myUserDetailService;
         this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody User user) {
-        logger.debug("Attempting to log in user: {}", user.getUserName());
-        boolean authenticated = userService.authenticateUser(user.getUserName(), user.getPassword());
-        if (authenticated) {
-            UserDetails userDetails = myUserDetailService.loadUserByUsername(user.getUserName());
-            String token = jwtUtil.generateToken(String.valueOf(userDetails));
-            logger.debug("User authenticated, token generated: {}", token);
-            return ResponseEntity.ok(token);
-        } else {
-            logger.error("Invalid username or password for user: {}", user.getUserName());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+         try {
+            if (userService.authenticateUser(user.getUserName(), user.getPassword())) {
+                UserDetails userDetails = userService.findByUsername(user.getUserName());
+                String token = jwtUtil.generateToken(userDetails);
+                return ResponseEntity.ok(token);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during login");
         }
     }
 }

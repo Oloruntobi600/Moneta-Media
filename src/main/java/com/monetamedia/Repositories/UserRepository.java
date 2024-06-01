@@ -40,10 +40,11 @@ public class UserRepository {
         if (users.isEmpty()) {
             logger.log(Level.SEVERE, "User not found with username: " + username);
             return null;
-        } else {
-            logger.log(Level.SEVERE,"Multiple users found with username: {}", username);
+        } else if (users.size() > 1) {
+            logger.log(Level.SEVERE, "Multiple users found with username: " + username);
             // Handle this case according to your application's logic
-            // For now, returning the first user found
+            throw new IllegalStateException("Multiple users found with username: " + username);
+        } else {
             return users.get(0);
         }
     }
