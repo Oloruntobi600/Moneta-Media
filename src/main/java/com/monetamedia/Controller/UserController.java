@@ -1,5 +1,6 @@
 package com.monetamedia.Controller;
 
+import com.monetamedia.Dto.FollowDto;
 import com.monetamedia.Models.ResponseApi;
 import com.monetamedia.Models.User;
 import com.monetamedia.Service.UserService;
@@ -78,20 +79,18 @@ public class UserController {
     }
 
 
-    @PostMapping("/{id}/follow/{followId}")
-    public ResponseEntity<String> followUser(@PathVariable Long id, @PathVariable Long followId) {
-        //fun
-        userService.followUser(id, followId);
-        String username = userService.getUserById(id).getUserName();
-        String followUsername = userService.getUserById(followId).getUserName();
-        return ResponseEntity.ok(username + " has followed " + followUsername + " successfully");
+    @PostMapping("/follow/{followId}")
+    public ResponseEntity<String> followUser(HttpServletRequest request, @PathVariable Long followId) {
+
+        FollowDto followDto = userService.followUser(request, followId);
+
+        return ResponseEntity.ok(followDto.getCurrentUser() + " has followed " + followDto.getFollowedUser() + " successfully");
     }
-    @PostMapping("/{id}/unfollow/{unfollowId}")
-    public ResponseEntity<String> unfollowUser(@PathVariable Long id, @PathVariable Long unfollowId) {
-        userService.unfollowUser(id, unfollowId);
-        String username = userService.getUserById(id).getUserName();
-        String followUsername = userService.getUserById(unfollowId).getUserName();
-        return ResponseEntity.ok(username + " has unfollowed " + followUsername + " successfully");
+    @PostMapping("/unfollow/{unfollowId}")
+    public ResponseEntity<String> unfollowUser(HttpServletRequest request, @PathVariable Long unfollowId) {
+        FollowDto followDto = userService.unfollowUser(request, unfollowId);
+
+        return ResponseEntity.ok("User :" + " has unfollowed " + followDto.getUnFollowedUser() + " successfully");
     }
 
     @PostMapping("/login")

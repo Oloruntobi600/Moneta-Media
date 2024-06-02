@@ -14,8 +14,8 @@ public class User {
     private String email;
     private String profilePicture;
     private String password;
-    private List<Long> followers;
-    private List<Long> following;
+    private List<User> followers;
+    private List<User> following;
 
 
     public User() {
@@ -62,22 +62,21 @@ public class User {
         this.profilePicture = profilePicture;
     }
 
-    public List<Long> getFollowers() {
+    public List<User> getFollowers() {
         return followers;
     }
 
-    public void setFollowers(List<Long> followers) {
+    public void setFollowers(List<User> followers) {
         this.followers = followers;
     }
 
-    public List<Long> getFollowing() {
+    public List<User> getFollowing() {
         return following;
     }
 
-    public void setFollowing(List<Long> following) {
+    public void setFollowing(List<User> following) {
         this.following = following;
     }
-
 
     public boolean isPresent() {
         return false;

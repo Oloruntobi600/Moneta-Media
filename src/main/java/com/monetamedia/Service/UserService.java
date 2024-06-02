@@ -1,11 +1,11 @@
 package com.monetamedia.Service;
 
+import com.monetamedia.Dto.FollowDto;
 import com.monetamedia.Models.ResponseApi;
 import com.monetamedia.Models.User;
 import com.monetamedia.Repositories.UserRepository;
 import com.monetamedia.Utility.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -69,12 +69,32 @@ public class UserService {
         }
     }
 
-    public void followUser(Long userId, Long followUserId) {
-        userRepository.followUser(userId, followUserId);
+    public FollowDto followUser(HttpServletRequest request, Long followUserId) {
+       Optional<User> user= jwtUtil.resolveUser(request);
+        System.out.println(user);
+        System.out.println(user.get().getUserId());
+        int userid = userRepository.followUser((long) user.get().getUserId(), followUserId);
+        User currentLoogedInUser = userRepository.findById((long) userid);
+        User followeduser = userRepository.findById((long) followUserId);
+
+        FollowDto followDto = new FollowDto();
+        followDto.setCurrentUser(currentLoogedInUser.getUserName());
+        followDto.setFollowedUser(followeduser.getUserName());
+        return followDto;
     }
 
-    public void unfollowUser(Long userId, Long unfollowUserId) {
-        userRepository.unfollowUser(userId, unfollowUserId);
+    public FollowDto unfollowUser(HttpServletRequest request, Long unfollowUserId) {
+        Optional<User> user= jwtUtil.resolveUser(request);
+        System.out.println(user);
+        System.out.println(user.get().getUserId());
+        int userid = userRepository.unfollowUser((long) user.get().getUserId(), unfollowUserId);
+        User currentLoogedInUser = userRepository.findById((long) userid);
+        User unfolloweduser = userRepository.findById((long) unfollowUserId);
+
+        FollowDto followDto = new FollowDto();
+        followDto.setCurrentUser(currentLoogedInUser.getUserName());
+        followDto.setUnFollowedUser(unfolloweduser.getUserName());
+        return followDto;
     }
 
     public boolean authenticateUser(String username, String password) {
