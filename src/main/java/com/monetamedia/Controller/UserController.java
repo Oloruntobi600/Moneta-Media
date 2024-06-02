@@ -3,9 +3,11 @@ package com.monetamedia.Controller;
 import com.monetamedia.Models.ResponseApi;
 import com.monetamedia.Models.User;
 import com.monetamedia.Service.UserService;
+import com.monetamedia.Utility.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,10 +17,12 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtUtil jwtUtil) {
         this.userService = userService;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/create")
@@ -76,6 +80,7 @@ public class UserController {
 
     @PostMapping("/{id}/follow/{followId}")
     public ResponseEntity<String> followUser(@PathVariable Long id, @PathVariable Long followId) {
+        //fun
         userService.followUser(id, followId);
         String username = userService.getUserById(id).getUserName();
         String followUsername = userService.getUserById(followId).getUserName();
@@ -87,5 +92,20 @@ public class UserController {
         String username = userService.getUserById(id).getUserName();
         String followUsername = userService.getUserById(unfollowId).getUserName();
         return ResponseEntity.ok(username + " has unfollowed " + followUsername + " successfully");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody User user) {
+        try {
+            if (userService.authenticateUser(user.getUserName(), user.getPassword())) {
+                UserDetails userDetails = userService.findByUsername(user.getUserName());
+                String token = jwtUtil.generateToken(userDetails);
+                return ResponseEntity.ok(token);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during login");
+        }
     }
 }

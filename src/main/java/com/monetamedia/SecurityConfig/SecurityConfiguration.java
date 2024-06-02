@@ -42,9 +42,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable() // Disable CSRF protection
                 .authorizeRequests()
-                .antMatchers("/authenticate/**","/register","/logins/login").permitAll()
+                .antMatchers("/authenticate/**","/register","/users/login").permitAll()
                 .antMatchers("/users/create").permitAll()
                 .anyRequest().authenticated()
+
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 

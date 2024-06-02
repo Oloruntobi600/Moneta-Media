@@ -5,7 +5,7 @@ services:
     image: postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: newpassword  # Set a non-empty password here
+      POSTGRES_PASSWORD: Olawumi  # Set a non-empty password here
       POSTGRES_DB: Moneta_Media
     ports:
     - "5433:5432"  # Map external port 5434 to internal port 5432
@@ -21,7 +21,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/Moneta_Media  # Use the internal port 5432 and the service name `postgres`
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: newpassword  # Ensure this matches the password set for the postgres service
+      SPRING_DATASOURCE_PASSWORD: Olawumi  # Ensure this matches the password set for the postgres service
     networks:
       - monetamedia-network
 
